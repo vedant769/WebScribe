@@ -28,14 +28,13 @@ function cacheElements() {
   els.wordCount = document.getElementById("wordCount");
   els.saveStatus = document.getElementById("saveStatus");
   els.deleteBtn = document.getElementById("deleteBtn");
-  els.themeToggle = document.getElementById("themeToggle");
+  els.themeToggleBtn = document.getElementById("themeToggleBtn");
   els.searchInput = document.getElementById("searchInput");
   els.searchResults = document.getElementById("searchResults");
   els.historyResults = document.getElementById("historyResults");
   els.exportBtn = document.getElementById("exportBtn");
-  els.toggleSidebarBtn = document.getElementById("toggleSidebarBtn");
+  els.openSidebarBtn = document.getElementById("openSidebarBtn");
 
-  els.lastSaved = document.getElementById("lastSaved");
   els.saveBtn = document.getElementById("saveBtn");
 
   els.viewEditor = document.getElementById("viewEditor");
@@ -61,13 +60,13 @@ function attachEventListeners() {
 
   els.deleteBtn.addEventListener("click", handleDelete);
 
-  els.themeToggle.addEventListener("change", handleThemeToggle);
+  els.themeToggleBtn.addEventListener("click", handleThemeToggle);
 
   els.searchInput.addEventListener("input", handleSearchInput);
 
   els.exportBtn.addEventListener("click", exportNotesAsText);
 
-  els.toggleSidebarBtn.addEventListener("click", toggleSidebarOnCurrentTab);
+  els.openSidebarBtn.addEventListener("click", toggleSidebarOnCurrentTab);
 
   els.saveBtn.addEventListener("click", () => {
     // Immediate save (still keeps debounced autosave)
@@ -76,7 +75,6 @@ function attachEventListeners() {
       saveTimeoutId = null;
     }
     els.saveStatus.textContent = "Saving...";
-    els.saveStatus.classList.remove("saved");
     saveNote();
   });
 
@@ -123,7 +121,6 @@ function loadCurrentTabNote() {
       els.tagsInput.value = (note.tags || []).join(", ");
       updateWordCount();
       clearSaveStatus();
-      updateLastSaved(note.updatedAt);
     });
   });
 }
@@ -134,7 +131,6 @@ function scheduleSave() {
     clearTimeout(saveTimeoutId);
   }
   els.saveStatus.textContent = "Saving...";
-  els.saveStatus.classList.remove("saved");
 
   // Debounced auto-save (1 second after typing stops)
   saveTimeoutId = setTimeout(() => {
@@ -169,8 +165,9 @@ function saveNote() {
 
     chrome.storage.local.set({ [key]: note }, () => {
       els.saveStatus.textContent = "Saved";
-      els.saveStatus.classList.add("saved");
-      updateLastSaved(now);
+      setTimeout(() => {
+        els.saveStatus.textContent = "Auto-saved";
+      }, 2000);
     });
   });
 }
@@ -183,8 +180,9 @@ function handleDelete() {
     els.tagsInput.value = "";
     updateWordCount();
     els.saveStatus.textContent = "Deleted";
-    els.saveStatus.classList.add("saved");
-    updateLastSaved(null);
+    setTimeout(() => {
+      els.saveStatus.textContent = "Auto-saved";
+    }, 2000);
   });
 }
 
@@ -195,25 +193,23 @@ function updateWordCount() {
 }
 
 function clearSaveStatus() {
-  els.saveStatus.textContent = "";
-  els.saveStatus.classList.remove("saved");
+  els.saveStatus.textContent = "Auto-saved";
 }
 
 function handleThemeToggle() {
-  const isDark = !!els.themeToggle.checked;
+  const isDark = document.body.classList.contains("dark");
   if (isDark) {
-    document.body.classList.add("dark");
-  } else {
     document.body.classList.remove("dark");
+  } else {
+    document.body.classList.add("dark");
   }
-  chrome.storage.local.set({ [THEME_KEY]: isDark ? "dark" : "light" });
+  chrome.storage.local.set({ [THEME_KEY]: isDark ? "light" : "dark" });
 }
 
 function loadTheme() {
   chrome.storage.local.get(THEME_KEY, result => {
     const theme = result[THEME_KEY] || "light";
     const isDark = theme === "dark";
-    els.themeToggle.checked = isDark;
     if (isDark) {
       document.body.classList.add("dark");
     } else {
@@ -271,26 +267,34 @@ function performSearch(query) {
 
     matches.sort((a, b) => (b.note.updatedAt || 0) - (a.note.updatedAt || 0));
 
+    if (matches.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "text-xs text-on-surface-variant text-center py-4";
+      empty.textContent = "No notes found.";
+      els.searchResults.appendChild(empty);
+      return;
+    }
+
     matches.slice(0, 30).forEach(match => {
       const container = document.createElement("div");
-      container.className = "search-result";
+      container.className = "group relative p-3 bg-surface-container-lowest rounded-lg hover:bg-surface-container-low transition-all cursor-pointer";
 
       const snippetSource = match.note.content || "";
-      const snippet = snippetSource.length > 140
-        ? snippetSource.slice(0, 140) + "…"
+      const snippet = snippetSource.length > 100
+        ? snippetSource.slice(0, 100) + "…"
         : snippetSource;
 
       const tags = (match.note.tags || []).join(", ");
 
-      container.innerHTML = `
-        <div class="search-result-url">${escapeHtml(match.url)}</div>
-        <div class="search-result-snippet">${escapeHtml(snippet || "(empty)")}</div>
-        ${
-          tags
-            ? `<div class="search-result-tags">${escapeHtml(tags)}</div>`
-            : ""
-        }
+      let html = `
+        <div class="text-xs text-on-surface line-clamp-2 mb-1">${escapeHtml(snippet || "(empty)")}</div>
+        <div class="text-[10px] text-on-surface-variant truncate">${escapeHtml(match.url)}</div>
       `;
+      if (tags) {
+        html += `<div class="text-[10px] text-primary mt-1">${escapeHtml(tags)}</div>`;
+      }
+
+      container.innerHTML = html;
 
       // Clicking a result opens the URL in a new tab
       container.addEventListener("click", () => {
@@ -372,14 +376,30 @@ function updateLastSaved(updatedAt) {
 function setView(view) {
   currentView = view;
 
-  els.viewEditor.classList.toggle("wn-view--active", view === "editor");
-  els.viewAllNotes.classList.toggle("wn-view--active", view === "all");
-  els.viewHistory.classList.toggle("wn-view--active", view === "history");
-  els.viewSettings.classList.toggle("wn-view--active", view === "settings");
+  // Hide all views, show only the active one
+  els.viewEditor.classList.toggle("hidden-view", view !== "editor");
+  els.viewAllNotes.classList.toggle("hidden-view", view !== "all");
+  els.viewHistory.classList.toggle("hidden-view", view !== "history");
+  els.viewSettings.classList.toggle("hidden-view", view !== "settings");
 
-  els.tabEditorBtn.classList.toggle("wn-tab--active", view === "editor");
-  els.tabAllBtn.classList.toggle("wn-tab--active", view === "all");
-  els.tabHistoryBtn.classList.toggle("wn-tab--active", view === "history");
+  // Update tab button styles
+  els.tabEditorBtn.classList.toggle("text-blue-600", view === "editor");
+  els.tabEditorBtn.classList.toggle("dark:text-blue-400", view === "editor");
+  els.tabEditorBtn.classList.toggle("text-zinc-500", view !== "editor");
+  els.tabEditorBtn.classList.toggle("dark:text-zinc-400", view !== "editor");
+  els.tabEditorBtn.classList.toggle("font-bold", view === "editor");
+
+  els.tabHistoryBtn.classList.toggle("text-blue-600", view === "history");
+  els.tabHistoryBtn.classList.toggle("dark:text-blue-400", view === "history");
+  els.tabHistoryBtn.classList.toggle("text-zinc-500", view !== "history");
+  els.tabHistoryBtn.classList.toggle("dark:text-zinc-400", view !== "history");
+  els.tabHistoryBtn.classList.toggle("font-bold", view === "history");
+
+  els.tabAllBtn.classList.toggle("text-blue-600", view === "all");
+  els.tabAllBtn.classList.toggle("dark:text-blue-400", view === "all");
+  els.tabAllBtn.classList.toggle("text-zinc-500", view !== "all");
+  els.tabAllBtn.classList.toggle("dark:text-zinc-400", view !== "all");
+  els.tabAllBtn.classList.toggle("font-bold", view === "all");
 
   if (view === "history") {
     renderHistory();
@@ -390,11 +410,6 @@ function setView(view) {
       els.searchResults.innerHTML = "";
     }
   }
-
-  // Accessibility state
-  els.tabEditorBtn.setAttribute("aria-selected", view === "editor" ? "true" : "false");
-  els.tabAllBtn.setAttribute("aria-selected", view === "all" ? "true" : "false");
-  els.tabHistoryBtn.setAttribute("aria-selected", view === "history" ? "true" : "false");
 }
 
 function renderHistory() {
@@ -418,7 +433,7 @@ function renderHistory() {
     const top = entries.slice(0, 12);
     if (top.length === 0) {
       const empty = document.createElement("div");
-      empty.className = "wn-hint";
+      empty.className = "text-xs text-on-surface-variant text-center py-4";
       empty.textContent = "No recent notes yet.";
       els.historyResults.appendChild(empty);
       return;
@@ -426,18 +441,25 @@ function renderHistory() {
 
     top.forEach(entry => {
       const container = document.createElement("div");
-      container.className = "search-result";
+      container.className = "group relative p-3 bg-surface-container-lowest rounded-lg hover:bg-surface-container-low transition-all cursor-pointer";
 
       const snippetSource = entry.note.content || "";
-      const snippet = snippetSource.length > 140 ? snippetSource.slice(0, 140) + "…" : snippetSource;
+      const snippet = snippetSource.length > 100 ? snippetSource.slice(0, 100) + "…" : snippetSource;
       const tags = (entry.note.tags || []).join(", ");
+      const dateStr = new Date(entry.updatedAt).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
-      container.innerHTML = `
-        <div class="search-result-url">${escapeHtml(entry.url)}</div>
-        <div class="search-result-snippet">${escapeHtml(snippet || "(empty)")}</div>
-        ${tags ? `<div class="search-result-tags">${escapeHtml(tags)}</div>` : ""}
+      let html = `
+        <div class="flex justify-between items-start mb-1">
+          <span class="text-[10px] text-on-surface-variant/60">${escapeHtml(dateStr)}</span>
+        </div>
+        <div class="text-xs text-on-surface line-clamp-2 mb-1">${escapeHtml(snippet || "(empty)")}</div>
+        <div class="text-[10px] text-on-surface-variant truncate">${escapeHtml(entry.url)}</div>
       `;
+      if (tags) {
+        html += `<div class="text-[10px] text-primary mt-1">${escapeHtml(tags)}</div>`;
+      }
 
+      container.innerHTML = html;
       container.addEventListener("click", () => chrome.tabs.create({ url: entry.url }));
       els.historyResults.appendChild(container);
     });
