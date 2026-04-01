@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "WebNotes",
+  "description": "Take contextual notes tied to each webpage.",
+  "version": "1.0.0",
+  "action": {
+    "default_title": "WebNotes",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "contextMenus",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js", "annotations.js"],
+      "css": ["sidebar.css", "annotations.css"]
+    }
+  ]
+}

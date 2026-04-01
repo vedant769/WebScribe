@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WebNotes</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="wn-shell">
+    <header class="wn-topbar">
+      <div class="wn-topbar-left">
+        <img id="siteFavicon" class="wn-favicon" alt="" />
+        <div class="wn-topbar-title">
+          <div class="wn-app">WebNotes</div>
+          <div class="wn-sub">Notes for <span id="siteDomain">this page</span></div>
+        </div>
+      </div>
+
+      <button id="settingsBtn" class="wn-icon-btn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+          <path d="M19.4 15a7.8 7.8 0 0 0 .1-1 7.8 7.8 0 0 0-.1-1l2-1.5-2-3.5-2.4.7a7.6 7.6 0 0 0-1.7-1l-.4-2.4H10l-.4 2.4a7.6 7.6 0 0 0-1.7 1l-2.4-.7-2 3.5 2 1.5a7.8 7.8 0 0 0-.1 1 7.8 7.8 0 0 0 .1 1l-2 1.5 2 3.5 2.4-.7a7.6 7.6 0 0 0 1.7 1l.4 2.4h4.1l.4-2.4a7.6 7.6 0 0 0 1.7-1l2.4.7 2-3.5-2-1.5Z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <main class="wn-page">
+      <button id="toggleSidebarBtn" class="wn-primary" title="Toggle in-page sidebar">
+        <span class="wn-primary-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h7v16H4z"></path>
+            <path d="M13 4h7v16h-7z"></path>
+          </svg>
+        </span>
+        <span class="wn-primary-text">Open Sidebar</span>
+        <span class="wn-kbd">Alt+S</span>
+      </button>
+
+      <div class="wn-tabs" role="tablist" aria-label="Navigation">
+        <button id="tabEditorBtn" class="wn-tab wn-tab--active" role="tab" aria-selected="true">Note</button>
+        <button id="tabAllBtn" class="wn-tab" role="tab" aria-selected="false">All Notes</button>
+        <button id="tabHistoryBtn" class="wn-tab" role="tab" aria-selected="false">History</button>
+      </div>
+
+      <section class="wn-card">
+        <div id="viewEditor" class="wn-view wn-view--active" data-view="editor">
+          <div class="wn-card-head">
+            <div class="wn-card-title">Page note</div>
+            <div class="wn-card-actions">
+              <span id="saveStatus" class="wn-save-status"></span>
+              <button id="deleteBtn" class="wn-btn wn-btn--danger">Clear</button>
+            </div>
+          </div>
+
+          <textarea
+            id="noteTextarea"
+            class="wn-editor"
+            placeholder="Write your note for this page..."
+          ></textarea>
+
+          <div class="wn-meta">
+            <div class="wn-field">
+              <label class="wn-label" for="tagsInput">Tags</label>
+              <input
+                id="tagsInput"
+                type="text"
+                class="wn-input"
+                placeholder="e.g. docs, research, todo"
+              />
+            </div>
+            <div class="wn-meta-right">
+              <div id="wordCount" class="wn-metric">0 words</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="viewAllNotes" class="wn-view" data-view="all">
+          <div class="wn-card-head">
+            <div class="wn-card-title">All notes</div>
+            <div class="wn-card-actions">
+              <button id="exportBtn" class="wn-btn wn-btn--ghost">Export .txt</button>
+            </div>
+          </div>
+          <input
+            id="searchInput"
+            type="text"
+            class="wn-input"
+            placeholder="Search across all notes and tags..."
+          />
+          <div id="searchResults" class="wn-results"></div>
+        </div>
+
+        <div id="viewHistory" class="wn-view" data-view="history">
+          <div class="wn-card-head">
+            <div class="wn-card-title">History</div>
+            <div class="wn-card-actions">
+              <span class="wn-hint">Recent pages</span>
+            </div>
+          </div>
+          <div id="historyResults" class="wn-results"></div>
+        </div>
+
+        <div id="viewSettings" class="wn-view" data-view="settings">
+          <div class="wn-card-head">
+            <div class="wn-card-title">Settings</div>
+            <div class="wn-card-actions">
+              <span class="wn-hint">Appearance</span>
+            </div>
+          </div>
+
+          <div class="wn-setting-row">
+            <div class="wn-setting-text">
+              <div class="wn-setting-title">Dark mode</div>
+              <div class="wn-setting-subtitle">Switch theme for the popup & sidebar</div>
+            </div>
+            <label class="wn-switch">
+              <input type="checkbox" id="themeToggle" />
+              <span class="wn-switch-track">
+                <span class="wn-switch-thumb"></span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <footer class="wn-footer">
+        <div class="wn-footer-left">
+          <div class="wn-footer-meta">
+            <div class="wn-footer-label">Last saved</div>
+            <div id="lastSaved" class="wn-footer-value">—</div>
+          </div>
+        </div>
+        <div class="wn-footer-right">
+          <button id="saveBtn" class="wn-btn wn-btn--primary">Save</button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
