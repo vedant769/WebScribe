@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WebNotes Minimal Dark Mode Popup</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="typography">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+<style data-purpose="custom-utilities">
+    .bg-app-dark { background-color: #1a1a1a; }
+    .bg-card-dark { background-color: #242424; }
+    .bg-input-dark { background-color: #333333; }
+    .text-app-muted { color: #9ca3af; }
+    .border-input-dark { border-color: #404040; }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<!-- BEGIN: Extension Popup Container -->
+<div class="bg-app-dark w-[400px] h-[700px] rounded-[32px] shadow-2xl flex flex-col overflow-hidden border border-gray-800">
+<!-- BEGIN: Header -->
+<header class="flex items-center justify-between px-6 pt-8 pb-4">
+<h1 class="text-white text-2xl font-semibold tracking-wide flex-1 text-center pl-10">WebNotes</h1>
+<button aria-label="Settings" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+<svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</header>
+<!-- END: Header -->
+<!-- BEGIN: Tabs -->
+<div class="px-6 pb-6">
+<div class="bg-card-dark rounded-full p-1.5 flex gap-1">
+<button class="flex-1 bg-[#fbbf24] text-black font-medium py-2.5 rounded-full text-sm transition-colors">Note</button>
+<button class="flex-1 text-gray-400 hover:text-white font-medium py-2.5 rounded-full text-sm transition-colors">All Notes</button>
+<button class="flex-1 text-gray-400 hover:text-white font-medium py-2.5 rounded-full text-sm transition-colors">History</button>
+</div>
+</div>
+<!-- END: Tabs -->
+<!-- BEGIN: Main Content Area -->
+<main class="flex-1 bg-card-dark mx-6 mb-6 rounded-3xl p-5 flex flex-col relative">
+<!-- Section Header -->
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-gray-400 text-sm font-medium tracking-wide">PAGE NOTE</h2>
+<button class="text-[#ef4444] border border-[#ef4444]/30 rounded-full px-4 py-1 text-sm hover:bg-[#ef4444]/10 transition-colors">Clear</button>
+</div>
+<!-- Text Area -->
+<textarea class="w-full bg-input-dark border border-input-dark rounded-2xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 focus:ring-0 resize-none flex-1 mb-2" placeholder="Write your note..."></textarea>
+<!-- Word Count -->
+<div class="text-right text-gray-400 text-sm mb-4 pr-2">
+        0 words
+      </div>
+<!-- Tag Input -->
+<input class="w-full bg-input-dark border border-input-dark rounded-full px-5 py-3.5 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 focus:ring-0 text-sm" placeholder="e.g. docs, research, todo" type="text"/>
+</main>
+<!-- END: Main Content Area -->
+<!-- BEGIN: Footer -->
+<footer class="bg-[#2a2a2a] px-8 py-5 flex items-center justify-between rounded-b-[32px] mt-auto">
+<span class="text-gray-400 text-sm">Last saved: 10:10 PM</span>
+<button class="bg-[#fbbf24] hover:bg-[#f5b316] text-black font-semibold py-3 px-8 rounded-full transition-colors shadow-lg shadow-yellow-500/20">Save</button>
+</footer>
+<!-- END: Footer -->
+</div>
+<!-- END: Extension Popup Container -->
+</body></html>
