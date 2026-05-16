@@ -447,3 +447,28 @@ function WebScribeScheduleRestoreAnnotations() {
     WebScribeRestoreAnnotationsForPage();
   }, 1000);
 }
+
+/**
+ * Listens for messages from the popup to scroll to and blink a specific annotation.
+ */
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!message || typeof message !== "object") return;
+
+  if (message.type === "scrollToAnnotation" && message.annotationId) {
+    const span = document.querySelector(
+      `.WebScribe-annotation-highlight[data-annotation-id="${message.annotationId}"]`
+    );
+    if (span) {
+      // Scroll the annotation into view
+      span.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // Blink 2 times after scroll completes
+      setTimeout(() => {
+        span.classList.add("WebScribe-annotation-blink");
+        span.addEventListener("animationend", () => {
+          span.classList.remove("WebScribe-annotation-blink");
+        }, { once: true });
+      }, 400); // small delay for scroll to settle
+    }
+  }
+});

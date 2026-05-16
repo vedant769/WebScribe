@@ -240,6 +240,29 @@
   );
 }
 
+/* Blink animation for scroll-to-annotation */
+@keyframes WebScribe-blink-anim {
+  0%, 100% {
+    outline: 2px solid transparent;
+    outline-offset: 1px;
+    background: linear-gradient(to bottom, var(--wsn-hl-from), var(--wsn-hl-to));
+  }
+  50% {
+    outline: 2px solid var(--wsn-accent);
+    outline-offset: 2px;
+    background: linear-gradient(
+      to bottom,
+      var(--wsn-hl-hov-from),
+      var(--wsn-hl-hov-to)
+    );
+    box-shadow: 0 0 12px 4px var(--wsn-accent-glow);
+  }
+}
+
+.WebScribe-annotation-highlight.WebScribe-annotation-blink {
+  animation: WebScribe-blink-anim 0.5s ease-in-out 2;
+}
+
 
 /* ===============================
    Tooltip when hovering highlight

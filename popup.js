@@ -1,6 +1,7 @@
 // WebScribe popup logic: URL-based notes, auto-save, search, export, dark mode, sidebar toggle.
 
 const NOTE_PREFIX = "note:";
+const ANNOT_PREFIX = "annotations:";
 const THEME_KEY = "settings:theme";
 
 let currentUrl = "";
@@ -262,17 +263,43 @@ function performSearch(query) {
     const matches = [];
 
     Object.entries(items || {}).forEach(([key, value]) => {
-      if (!key.startsWith(NOTE_PREFIX)) return;
-      const url = key.slice(NOTE_PREFIX.length);
-      const note = normalizeNote(value);
-      const haystack = (
-        (note.content || "") +
-        " " +
-        (note.tags || []).join(" ")
-      ).toLowerCase();
+      // Page notes
+      if (key.startsWith(NOTE_PREFIX)) {
+        const url = key.slice(NOTE_PREFIX.length);
+        const note = normalizeNote(value);
+        const haystack = (
+          (note.content || "") +
+          " " +
+          (note.tags || []).join(" ")
+        ).toLowerCase();
 
-      if (haystack.includes(lower)) {
-        matches.push({ url, note });
+        if (haystack.includes(lower)) {
+          matches.push({ url, note, type: "note" });
+        }
+      }
+
+      // Annotations (text selection notes)
+      if (key.startsWith(ANNOT_PREFIX)) {
+        const url = key.slice(ANNOT_PREFIX.length);
+        const annotations = Array.isArray(value) ? value : [];
+        annotations.forEach(annot => {
+          const haystack = (
+            (annot.text || "") + " " + (annot.note || "")
+          ).toLowerCase();
+          if (haystack.includes(lower)) {
+            matches.push({
+              url,
+              note: {
+                content: annot.note || "",
+                tags: [],
+                createdAt: annot.createdAt || Date.now(),
+                updatedAt: annot.createdAt || Date.now()
+              },
+              selectedText: annot.text || "",
+              type: "annotation"
+            });
+          }
+        });
       }
     });
 
@@ -290,6 +317,16 @@ function performSearch(query) {
       const container = document.createElement("div");
       container.className = "ws-result-card";
 
+      let html = "";
+
+      if (match.type === "annotation") {
+        const selText = match.selectedText.length > 80
+          ? match.selectedText.slice(0, 80) + "…"
+          : match.selectedText;
+        html += `<div class="ws-result-badge">📌 Annotation</div>`;
+        html += `<div class="ws-result-quote">"${escapeHtml(selText)}"</div>`;
+      }
+
       const snippetSource = match.note.content || "";
       const snippet = snippetSource.length > 100
         ? snippetSource.slice(0, 100) + "…"
@@ -297,7 +334,7 @@ function performSearch(query) {
 
       const tags = (match.note.tags || []).join(", ");
 
-      let html = `
+      html += `
         <div class="ws-result-snippet">${escapeHtml(snippet || "(empty)")}</div>
         <div class="ws-result-url">${escapeHtml(match.url)}</div>
       `;
@@ -307,7 +344,6 @@ function performSearch(query) {
 
       container.innerHTML = html;
 
-      // Clicking a result opens the URL in a new tab
       container.addEventListener("click", () => {
         chrome.tabs.create({ url: match.url });
       });
@@ -427,20 +463,46 @@ function renderHistory() {
 
   chrome.storage.local.get(null, items => {
     const entries = [];
+
     Object.entries(items || {}).forEach(([key, value]) => {
-      if (!key.startsWith(NOTE_PREFIX)) return;
-      const url = key.slice(NOTE_PREFIX.length);
-      const note = normalizeNote(value);
-      const updatedAt = note.updatedAt || 0;
-      // only show items that have content
-      if ((note.content || "").trim() || (note.tags || []).length) {
-        entries.push({ url, note, updatedAt });
+      // Page notes
+      if (key.startsWith(NOTE_PREFIX)) {
+        const url = key.slice(NOTE_PREFIX.length);
+        const note = normalizeNote(value);
+        const updatedAt = note.updatedAt || 0;
+        if ((note.content || "").trim() || (note.tags || []).length) {
+          entries.push({ url, note, updatedAt, type: "note" });
+        }
+      }
+
+      // Annotations (text selection notes) — only for the current tab
+      if (key.startsWith(ANNOT_PREFIX)) {
+        const url = key.slice(ANNOT_PREFIX.length);
+        if (url !== currentUrl) return; // skip annotations from other pages
+        const annotations = Array.isArray(value) ? value : [];
+        annotations.forEach(annot => {
+          if ((annot.note || "").trim()) {
+            entries.push({
+              url,
+              note: {
+                content: annot.note || "",
+                tags: [],
+                createdAt: annot.createdAt || Date.now(),
+                updatedAt: annot.createdAt || Date.now()
+              },
+              selectedText: annot.text || "",
+              annotationId: annot.id || "",
+              updatedAt: annot.createdAt || 0,
+              type: "annotation"
+            });
+          }
+        });
       }
     });
 
     entries.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
-    const top = entries.slice(0, 12);
+    const top = entries.slice(0, 20);
     if (top.length === 0) {
       const empty = document.createElement("div");
       empty.className = "ws-empty-state";
@@ -453,13 +515,23 @@ function renderHistory() {
       const container = document.createElement("div");
       container.className = "ws-result-card";
 
+      const dateStr = new Date(entry.updatedAt).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+      let html = `<div class="ws-result-date">${escapeHtml(dateStr)}</div>`;
+
+      if (entry.type === "annotation") {
+        const selText = (entry.selectedText || "").length > 80
+          ? entry.selectedText.slice(0, 80) + "…"
+          : entry.selectedText;
+        html += `<div class="ws-result-badge">📌 Annotation</div>`;
+        html += `<div class="ws-result-quote">"${escapeHtml(selText)}"</div>`;
+      }
+
       const snippetSource = entry.note.content || "";
       const snippet = snippetSource.length > 100 ? snippetSource.slice(0, 100) + "…" : snippetSource;
       const tags = (entry.note.tags || []).join(", ");
-      const dateStr = new Date(entry.updatedAt).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
-      let html = `
-        <div class="ws-result-date">${escapeHtml(dateStr)}</div>
+      html += `
         <div class="ws-result-snippet">${escapeHtml(snippet || "(empty)")}</div>
         <div class="ws-result-url">${escapeHtml(entry.url)}</div>
       `;
@@ -468,7 +540,23 @@ function renderHistory() {
       }
 
       container.innerHTML = html;
-      container.addEventListener("click", () => chrome.tabs.create({ url: entry.url }));
+      container.addEventListener("click", () => {
+        if (entry.type === "annotation" && entry.url === currentUrl && entry.annotationId) {
+          // Same page — scroll to the highlighted text and blink it
+          chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+            const tab = tabs && tabs[0];
+            if (tab && tab.id) {
+              chrome.tabs.sendMessage(tab.id, {
+                type: "scrollToAnnotation",
+                annotationId: entry.annotationId
+              });
+            }
+            window.close();
+          });
+        } else {
+          chrome.tabs.create({ url: entry.url });
+        }
+      });
       els.historyResults.appendChild(container);
     });
   });

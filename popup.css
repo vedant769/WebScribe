@@ -436,6 +436,30 @@ body.dark .ws-main {
   transition: color 0.3s ease;
 }
 
+/* Annotation badge */
+.ws-result-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ws-accent);
+  margin-bottom: 4px;
+  letter-spacing: 0.03em;
+}
+
+/* Annotation quoted selection text */
+.ws-result-quote {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ws-text-sec);
+  border-left: 2px solid var(--ws-accent);
+  padding-left: 8px;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .ws-empty-state {
   text-align: center;
   color: var(--ws-text-dim);
