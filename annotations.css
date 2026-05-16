@@ -1,0 +1,266 @@
+/* ===============================
+   WebScribe – Selection UI Styles
+   Dark theme = default
+   Light theme = .ws-light modifier
+   =============================== */
+
+/* ---------- Shared Variables ---------- */
+.WebScribe-add-note-btn,
+.WebScribe-note-popup,
+.WebScribe-annotation-highlight,
+.WebScribe-hover-tooltip {
+  /* Dark theme (default) */
+  --wsn-bg:          #242424;
+  --wsn-input:       #333333;
+  --wsn-input-bdr:   #404040;
+  --wsn-text:        #ffffff;
+  --wsn-text-dim:    #6b7280;
+  --wsn-text-sec:    #9ca3af;
+  --wsn-accent:      #fbbf24;
+  --wsn-accent-hov:  #f5b316;
+  --wsn-accent-glow: rgba(251, 191, 36, 0.20);
+  --wsn-accent-shadow: rgba(251, 191, 36, 0.35);
+  --wsn-border:      #333333;
+  --wsn-cancel-bg:   #333333;
+  --wsn-cancel-bdr:  #404040;
+  --wsn-cancel-text: #9ca3af;
+  --wsn-cancel-hov:  #3a3a3a;
+  --wsn-shadow:      rgba(0, 0, 0, 0.50);
+  --wsn-hl-from:     rgba(251, 191, 36, 0.15);
+  --wsn-hl-to:       rgba(251, 191, 36, 0.25);
+  --wsn-hl-hov-from: rgba(251, 191, 36, 0.30);
+  --wsn-hl-hov-to:   rgba(251, 191, 36, 0.40);
+  --wsn-hl-underline:rgba(251, 191, 36, 0.45);
+}
+
+/* Light theme overrides */
+.WebScribe-add-note-btn.ws-light,
+.WebScribe-note-popup.ws-light,
+.WebScribe-annotation-highlight.ws-light,
+.WebScribe-hover-tooltip.ws-light {
+  --wsn-bg:          #ffffff;
+  --wsn-input:       #f0f0f5;
+  --wsn-input-bdr:   #d1d1d6;
+  --wsn-text:        #1c1c1e;
+  --wsn-text-dim:    #aeaeb2;
+  --wsn-text-sec:    #6e6e73;
+  --wsn-accent:      #f5a623;
+  --wsn-accent-hov:  #e6991a;
+  --wsn-accent-glow: rgba(245, 166, 35, 0.18);
+  --wsn-accent-shadow: rgba(245, 166, 35, 0.30);
+  --wsn-border:      #d1d1d6;
+  --wsn-cancel-bg:   #f0f0f5;
+  --wsn-cancel-bdr:  #d1d1d6;
+  --wsn-cancel-text: #6e6e73;
+  --wsn-cancel-hov:  #e5e5ea;
+  --wsn-shadow:      rgba(0, 0, 0, 0.12);
+  --wsn-hl-from:     rgba(245, 166, 35, 0.12);
+  --wsn-hl-to:       rgba(245, 166, 35, 0.22);
+  --wsn-hl-hov-from: rgba(245, 166, 35, 0.28);
+  --wsn-hl-hov-to:   rgba(245, 166, 35, 0.38);
+  --wsn-hl-underline:rgba(245, 166, 35, 0.50);
+}
+
+
+/* ===============================
+   Floating "Add Note" Button
+   =============================== */
+
+.WebScribe-add-note-btn {
+  position: absolute;
+  z-index: 2147483645;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  background: var(--wsn-accent);
+  color: #000000;
+
+  border-radius: 999px;
+  border: none;
+
+  box-shadow: 0 4px 14px var(--wsn-accent-shadow);
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.WebScribe-add-note-btn:hover {
+  transform: translateY(-2px);
+  background: var(--wsn-accent-hov);
+  box-shadow: 0 8px 20px var(--wsn-accent-shadow);
+}
+
+.WebScribe-add-note-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px var(--wsn-accent-shadow);
+}
+
+
+/* ===============================
+   Note Input Popup
+   =============================== */
+
+.WebScribe-note-popup {
+  position: absolute;
+  z-index: 2147483645;
+  width: 260px;
+  padding: 16px;
+  border-radius: 20px;
+
+  background: var(--wsn-bg);
+  border: 1px solid var(--wsn-border);
+  box-shadow: 0 20px 50px var(--wsn-shadow),
+              0 0 0 1px rgba(255, 255, 255, 0.04);
+
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  animation: WebScribeFadeIn 0.18s ease;
+}
+
+/* Remove inner white glow in light mode */
+.WebScribe-note-popup.ws-light {
+  box-shadow: 0 20px 50px var(--wsn-shadow),
+              0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+@keyframes WebScribeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.WebScribe-note-popup textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+
+  border-radius: 12px;
+  border: 1px solid var(--wsn-input-bdr);
+  background: var(--wsn-input);
+  color: var(--wsn-text);
+
+  padding: 10px 12px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.WebScribe-note-popup textarea::placeholder {
+  color: var(--wsn-text-dim);
+}
+
+.WebScribe-note-popup textarea:focus {
+  border-color: var(--wsn-accent);
+  box-shadow: 0 0 0 3px var(--wsn-accent-glow);
+}
+
+
+/* ===============================
+   Popup Buttons
+   =============================== */
+
+.WebScribe-note-popup-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.WebScribe-note-popup-btn {
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* Save Button */
+.WebScribe-note-popup-btn.save {
+  background: var(--wsn-accent);
+  color: #000000;
+  box-shadow: 0 4px 12px var(--wsn-accent-shadow);
+}
+
+.WebScribe-note-popup-btn.save:hover {
+  background: var(--wsn-accent-hov);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--wsn-accent-shadow);
+}
+
+/* Cancel Button */
+.WebScribe-note-popup-btn.cancel {
+  background: var(--wsn-cancel-bg);
+  color: var(--wsn-cancel-text);
+  border: 1px solid var(--wsn-cancel-bdr);
+}
+
+.WebScribe-note-popup-btn.cancel:hover {
+  background: var(--wsn-cancel-hov);
+  color: var(--wsn-text);
+}
+
+
+/* ===============================
+   Highlighted Text Styling
+   =============================== */
+
+.WebScribe-annotation-highlight {
+  background: linear-gradient(
+    to bottom,
+    var(--wsn-hl-from),
+    var(--wsn-hl-to)
+  );
+
+  border-radius: 4px;
+  padding: 0 2px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 2px solid var(--wsn-hl-underline);
+}
+
+.WebScribe-annotation-highlight:hover {
+  background: linear-gradient(
+    to bottom,
+    var(--wsn-hl-hov-from),
+    var(--wsn-hl-hov-to)
+  );
+}
+
+
+/* ===============================
+   Tooltip when hovering highlight
+   =============================== */
+
+.WebScribe-hover-tooltip {
+  position: absolute;
+  z-index: 2147483646;
+  max-width: 260px;
+  padding: 10px 14px;
+
+  background: var(--wsn-bg);
+  color: var(--wsn-text);
+  border: 1px solid var(--wsn-border);
+
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  border-radius: 12px;
+
+  box-shadow: 0 12px 30px var(--wsn-shadow);
+  pointer-events: none;
+
+  animation: WebScribeFadeIn 0.15s ease;
+}

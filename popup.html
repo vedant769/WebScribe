@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>WebScribe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+
+<body>
+  <!-- Extension Popup Container -->
+  <div class="ws-shell">
+
+    <!-- Header -->
+    <header class="ws-header">
+      <h1 class="ws-title">WebScribe</h1>
+      <button id="settingsBtn" class="ws-icon-btn" aria-label="Settings" title="Settings">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path
+            d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"
+            stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Tabs -->
+    <div class="ws-tabs-wrapper">
+      <div class="ws-tabs">
+        <button id="tabEditorBtn" class="ws-tab ws-tab--active" data-tab="editor">Note</button>
+        <button id="tabAllBtn" class="ws-tab" data-tab="all">All Notes</button>
+        <button id="tabHistoryBtn" class="ws-tab" data-tab="history">History</button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="ws-main">
+
+      <!-- EDITOR VIEW (visible by default) -->
+      <div id="viewEditor" class="ws-view ws-view--active">
+        <div class="ws-card-head">
+          <h2 class="ws-card-label">PAGE NOTE</h2>
+          <div class="ws-card-head-right">
+            <div class="ws-site-info">
+              <span id="siteDomain" class="ws-site-domain">this page</span>
+            </div>
+            <button id="deleteBtn" class="ws-btn-clear">Clear</button>
+          </div>
+        </div>
+        <textarea id="noteTextarea" class="ws-editor" placeholder="Write your note..."></textarea>
+        <div class="ws-wordcount" id="wordCount">0 words</div>
+        <input id="tagsInput" class="ws-input" type="text" placeholder="e.g. docs, research, todo" />
+      </div>
+
+      <!-- ALL NOTES VIEW -->
+      <div id="viewAllNotes" class="ws-view">
+        <div class="ws-card-head">
+          <h2 class="ws-card-label">SEARCH NOTES</h2>
+          <button id="exportBtn" class="ws-btn-export">Export .txt</button>
+        </div>
+        <input id="searchInput" class="ws-input" type="text" placeholder="Search across all notes..." />
+        <div id="searchResults" class="ws-results"></div>
+      </div>
+
+      <!-- HISTORY VIEW -->
+      <div id="viewHistory" class="ws-view">
+        <div class="ws-card-head">
+          <h2 class="ws-card-label">RECENT NOTES</h2>
+        </div>
+        <div id="historyResults" class="ws-results"></div>
+      </div>
+
+      <!-- SETTINGS VIEW -->
+      <div id="viewSettings" class="ws-view">
+        <div class="ws-card-head">
+          <h2 class="ws-card-label">SETTINGS</h2>
+        </div>
+        <div class="ws-settings-list">
+          <div class="ws-setting-row">
+            <div>
+              <div class="ws-setting-title">Theme</div>
+              <div class="ws-setting-sub">Toggle light / dark appearance</div>
+            </div>
+            <button id="themeToggleBtn" class="ws-btn-setting">Toggle</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="ws-footer">
+      <span id="saveStatus" class="ws-footer-status">Auto-saved</span>
+      <button id="saveBtn" class="ws-btn-save">Save</button>
+    </footer>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
