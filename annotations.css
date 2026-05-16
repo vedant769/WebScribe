@@ -271,19 +271,69 @@
 .WebScribe-hover-tooltip {
   position: absolute;
   z-index: 2147483646;
-  max-width: 260px;
-  padding: 10px 14px;
+  min-width: 180px;
+  max-width: 280px;
+  padding: 0;
 
   background: var(--wsn-bg);
   color: var(--wsn-text);
   border: 1px solid var(--wsn-border);
 
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  border-radius: 14px;
+
+  box-shadow: 0 8px 32px var(--wsn-shadow),
+              0 0 0 1px rgba(255, 255, 255, 0.04);
+  pointer-events: auto;
+  overflow: hidden;
+
+  animation: WebScribeTooltipIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes WebScribeTooltipIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Note text inside tooltip */
+.WebScribe-tooltip-note {
   font-size: 12px;
-  border-radius: 12px;
+  line-height: 1.55;
+  color: var(--wsn-text);
+  padding: 12px 14px 10px;
+  max-height: 90px;
+  overflow-y: auto;
+  word-wrap: break-word;
+}
 
-  box-shadow: 0 12px 30px var(--wsn-shadow);
-  pointer-events: none;
+/* Divider between note and action */
+.WebScribe-tooltip-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 9px 14px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #ef4444;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--wsn-border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
 
-  animation: WebScribeFadeIn 0.15s ease;
+.WebScribe-tooltip-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
 }

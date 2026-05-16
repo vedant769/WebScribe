@@ -25,6 +25,8 @@ let WebScribeAddNoteButton = null;
 let WebScribeNotePopup = null;
 let WebScribeNotePopupTextarea = null;
 let WebScribeCurrentSelectionRange = null; // Range for which we are creating a note
+let WebScribeHoverTooltip = null; // Shared tooltip element for hover
+let WebScribeHoverTooltipTimeout = null; // Delay before hiding tooltip
 
 // Debounced re-application (for dynamic pages, if used)
 let WebScribeRestoreScheduled = false;
@@ -40,6 +42,7 @@ function WebScribeInitAnnotations() {
   WebScribeLoadTheme(() => {
     WebScribeCreateFloatingButton();
     WebScribeCreateNotePopup();
+    WebScribeCreateHoverTooltip();
     WebScribeHookSelectionEvents();
     WebScribeRestoreAnnotationsForPage();
     WebScribeListenForThemeChanges();
@@ -93,14 +96,11 @@ function WebScribeApplyThemeClass(element) {
 function WebScribeApplyThemeToAllElements() {
   WebScribeApplyThemeClass(WebScribeAddNoteButton);
   WebScribeApplyThemeClass(WebScribeNotePopup);
+  WebScribeApplyThemeClass(WebScribeHoverTooltip);
 
   // Update all existing highlight spans
   const highlights = document.querySelectorAll(".WebScribe-annotation-highlight");
   highlights.forEach(el => WebScribeApplyThemeClass(el));
-
-  // Update all tooltips
-  const tooltips = document.querySelectorAll(".WebScribe-hover-tooltip");
-  tooltips.forEach(el => WebScribeApplyThemeClass(el));
 }
 
 /**
@@ -407,13 +407,121 @@ function WebScribeApplyHighlightForAnnotation(annotation) {
   WebScribeApplyThemeClass(span);
   span.dataset.annotationId = id;
   span.dataset.note = note;
-  span.title = note; // native tooltip
+
+  // Hover tooltip with delete option
+  span.addEventListener("mouseenter", (e) => WebScribeShowHoverTooltip(e, span));
+  span.addEventListener("mouseleave", () => WebScribeScheduleHideTooltip());
 
   try {
     range.surroundContents(span);
   } catch (e) {
     // If surroundContents fails (e.g., invalid range), skip for safety
   }
+}
+
+/**
+ * Creates the shared hover tooltip element (hidden by default).
+ */
+function WebScribeCreateHoverTooltip() {
+  WebScribeHoverTooltip = document.createElement("div");
+  WebScribeHoverTooltip.className = "WebScribe-hover-tooltip";
+  WebScribeApplyThemeClass(WebScribeHoverTooltip);
+  WebScribeHoverTooltip.style.display = "none";
+
+  // Keep tooltip visible when hovering over it (so user can click Delete)
+  WebScribeHoverTooltip.addEventListener("mouseenter", () => {
+    if (WebScribeHoverTooltipTimeout) {
+      clearTimeout(WebScribeHoverTooltipTimeout);
+      WebScribeHoverTooltipTimeout = null;
+    }
+  });
+  WebScribeHoverTooltip.addEventListener("mouseleave", () => {
+    WebScribeScheduleHideTooltip();
+  });
+
+  document.documentElement.appendChild(WebScribeHoverTooltip);
+}
+
+/**
+ * Shows the hover tooltip near a highlight span with note text + delete button.
+ */
+function WebScribeShowHoverTooltip(event, span) {
+  if (WebScribeHoverTooltipTimeout) {
+    clearTimeout(WebScribeHoverTooltipTimeout);
+    WebScribeHoverTooltipTimeout = null;
+  }
+
+  const noteText = span.dataset.note || "";
+  const annotId = span.dataset.annotationId || "";
+
+  WebScribeHoverTooltip.innerHTML = "";
+
+  // Note text
+  const noteEl = document.createElement("div");
+  noteEl.className = "WebScribe-tooltip-note";
+  noteEl.textContent = noteText;
+  WebScribeHoverTooltip.appendChild(noteEl);
+
+  // Delete button
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "WebScribe-tooltip-delete-btn";
+  deleteBtn.textContent = "🗑 Delete";
+  deleteBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    WebScribeDeleteAnnotation(annotId, span);
+  });
+  WebScribeHoverTooltip.appendChild(deleteBtn);
+
+  WebScribeApplyThemeClass(WebScribeHoverTooltip);
+
+  // Position above the highlight
+  const rect = span.getBoundingClientRect();
+  WebScribeHoverTooltip.style.display = "block";
+
+  const tooltipHeight = WebScribeHoverTooltip.offsetHeight;
+  const top = rect.top + window.scrollY - tooltipHeight - 8;
+  const left = rect.left + window.scrollX;
+
+  WebScribeHoverTooltip.style.top = `${Math.max(0, top)}px`;
+  WebScribeHoverTooltip.style.left = `${Math.max(0, left)}px`;
+}
+
+/**
+ * Schedules hiding the tooltip after a short delay.
+ */
+function WebScribeScheduleHideTooltip() {
+  if (WebScribeHoverTooltipTimeout) {
+    clearTimeout(WebScribeHoverTooltipTimeout);
+  }
+  WebScribeHoverTooltipTimeout = setTimeout(() => {
+    WebScribeHoverTooltip.style.display = "none";
+    WebScribeHoverTooltipTimeout = null;
+  }, 250);
+}
+
+/**
+ * Deletes an annotation from storage and unwraps the highlight span.
+ */
+function WebScribeDeleteAnnotation(annotationId, span) {
+  // Hide tooltip immediately
+  WebScribeHoverTooltip.style.display = "none";
+
+  // Unwrap the span — put its text content back into the DOM
+  if (span && span.parentNode) {
+    const textNode = document.createTextNode(span.textContent);
+    span.parentNode.replaceChild(textNode, span);
+    // Merge adjacent text nodes for clean DOM
+    textNode.parentNode.normalize();
+  }
+
+  // Remove from storage
+  chrome.storage.local.get(WebScribe_ANNOT_PREFIX, data => {
+    const existing = Array.isArray(data[WebScribe_ANNOT_PREFIX])
+      ? data[WebScribe_ANNOT_PREFIX]
+      : [];
+    const updated = existing.filter(a => a.id !== annotationId);
+    chrome.storage.local.set({ [WebScribe_ANNOT_PREFIX]: updated });
+  });
 }
 
 /**
