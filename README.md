@@ -6,12 +6,34 @@
 
 ## ✨ Features
 
-- 📝 Take notes directly tied to any webpage
-- 🔍 Search through your notes
-- 💾 Auto-saves as you type
-- 🎨 Modern dark-themed UI
-- 📌 Sidebar for quick in-page annotations
-- 🖊️ Highlight and annotate text on any page
+### 📝 Page Notes
+- Write notes directly tied to any webpage URL
+- Auto-saves as you type with debounced saving
+- Tag your notes for easy organization
+- Word count displayed in real time
+
+### 🖊️ Text Annotations
+- Select any text on a page and click **"Add note"** to annotate it
+- Highlighted text is preserved with a gold underline
+- Hover over highlights to view the note and **delete** annotations you no longer need
+- Annotations are stored per-page and persist across sessions
+
+### 🔍 Search & History
+- **All Notes** — search across every saved note and annotation
+- **History** — view recent notes filtered to the current tab
+- Annotation cards show a 📌 badge and the quoted selected text
+- Click an annotation in History to **scroll to it on the page** with a 2× blink effect
+- Click a note from a different page to open it in a new tab
+
+### 🎨 Theming
+- Toggle between **light** and **dark** themes
+- Theme syncs across popup, sidebar, and in-page annotations in real time
+
+### 📤 Export
+- Export all notes as a `.txt` file from the All Notes tab
+
+### 📌 Sidebar
+- In-page floating sidebar for quick note-taking without opening the popup
 
 ---
 
@@ -32,8 +54,8 @@ WebScribe/
 ├── popup.js                # Popup logic & note management
 ├── background.js           # Service worker (context menus, events)
 ├── contentScript.js        # Injected into pages (sidebar trigger)
-├── annotations.js          # Text highlight & annotation logic
-├── annotations.css         # Annotation overlay styles
+├── annotations.js          # Text highlight, annotation & delete logic
+├── annotations.css         # Annotation overlay & tooltip styles
 ├── sidebar.css             # Sidebar panel styles
 │
 ├── .gitignore
